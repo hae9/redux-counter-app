@@ -1,18 +1,27 @@
-import { StrictMode } from "react";
+import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createStore } from "redux";
+import { Provider } from "react-redux";
+import { applyMiddleware, createStore } from "redux";
 import App from "./App";
-import counter from "./reducers";
+import loggerMiddleware from "./middleware/log";
+import rootReducer from "./reducers";
 
 const rootElement = document.getElementById("root");
-const root = createRoot(rootElement!);
+const root = rootElement && createRoot(rootElement);
 
-const store = createStore(counter);
-store.dispatch({ type: "INCREMENT" });
-store.dispatch({ type: "DECREMENT" });
+const middleware = applyMiddleware(loggerMiddleware);
+const store = createStore(rootReducer, middleware);
 
-root.render(
-  <StrictMode>
-    <App value={store.getState()} />
-  </StrictMode>
-);
+const render = () =>
+  root?.render(
+    <StrictMode>
+      <Provider store={store}>
+        <App
+        // onIncrement={() => store.dispatch({ type: "INCREMENT" })}
+        // onDecrement={() => store.dispatch({ type: "DECREMENT" })}
+        />
+      </Provider>
+    </StrictMode>
+  );
+render();
+store.subscribe(render);
